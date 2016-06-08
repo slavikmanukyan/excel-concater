@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html ng-app="app">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="./styles.css">
+    <title>Hello concater</title>
+    <script> 
+      window.$ = window.jQuery = require('jquery'); 
+      window.angular = require('angular');
+      require('ng-file-upload');
+    </script>
+  </head>
+  <body>
+    <div class="container" style="height:100%;" ng-controller="mainCtrl as main">
+      <h2 class="text-center" id="xls-ver">Excel concater v{{main.version}}</h2>
+      <div style="height: 80%;" ng-controller="filesCtrl as vm">
+        <form style="height: 100%;">
+          <div class="drop-zone" ngf-drop="vm.select()" ng-model = "vm.files" ngf-multiple="true" ngf-drag-over-class="vm.calcClass($event)">
+            <p style="margin-top:25%">Drop files here</p>
+            <div class="text-center">
+              <button class="btn btn-success" ng-click="vm.selectFiles()">Select files</button>
+            </div>
+          </div>
+          <div class="" ng-show="vm.filesToProccess.length">
+            <ul>
+              <li ng-repeat="file in vm.filesToProccess"> {{ vm.name(file) }} </li>
+            </ul>
+          </div>
+        </form>
+      </div>
+    </div>     
+  </body>
+
+  <script>    
+    require('./main-app');   
+    require('./files-ctrl');
+    require('./renderer');
+  </script>
+</html>

@@ -1,0 +1,21 @@
+.drop-zone {
+    text-align: center;
+    border: 2px dashed black;
+    width: 50%;
+    height: 50%;
+    margin: 0 auto;
+}
+
+.dragging-reject {
+    color: red;
+    border-color: red;
+}
+
+.dragging-accept {
+    color: green;
+    border-color: green;
+}
+
+html, body {
+    height: 100%;
+}
