@@ -8,4 +8,8 @@ const config = require('./excel');
 
        main.version = config.version;
     });
+
+    angular.element(document).ready(function() {
+      angular.bootstrap(document, ['app']);
+    });
 }(angular));

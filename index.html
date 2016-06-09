@@ -1,39 +1,109 @@
 <!DOCTYPE html>
-<html ng-app="app">
+<html>
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="./node_modules/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="./styles.css">
     <title>Hello concater</title>
     <script> 
       window.$ = window.jQuery = require('jquery'); 
       window.angular = require('angular');
       require('ng-file-upload');
+      require('./node_modules/bootstrap/dist/js/bootstrap');
     </script>
   </head>
   <body>
     <div class="container" style="height:100%;" ng-controller="mainCtrl as main">
       <h2 class="text-center" id="xls-ver">Excel concater v{{main.version}}</h2>
       <div style="height: 80%;" ng-controller="filesCtrl as vm">
-        <form style="height: 100%;">
-          <div class="drop-zone" ngf-drop="vm.select()" ng-model = "vm.files" ngf-multiple="true" ngf-drag-over-class="vm.calcClass($event)">
+        <ng-form style="height: 100%;" novalidate>
+          <div class="drop-zone" ngf-drop="vm.select()" 
+               ng-model="vm.files" ngf-multiple="true" ng-show="!vm.fileSelected && !vm.proccessing" 
+               ngf-drag-over-class="vm.calcClass($event)">
             <p style="margin-top:25%">Drop files here</p>
             <div class="text-center">
               <button class="btn btn-success" ng-click="vm.selectFiles()">Select files</button>
             </div>
           </div>
-          <div class="" ng-show="vm.filesToProccess.length">
-            <ul>
-              <li ng-repeat="file in vm.filesToProccess"> {{ vm.name(file) }} </li>
-            </ul>
+          <div class="file-stats" ng-show="vm.fileSelected && !vm.proccessing">
+             <div style="width: 70%; margin: 0 auto;">
+               <p class="text-center" style="font-size: 60px">
+                 <i class="fa fa-file-excel-o"></i>
+               </p>
+               <div style="position: absolute; right: 20%; top: 0;">
+                 <button class="btn btn-default" data-toggle="tooltip" ng-click="vm.remove(vm.selectedFile.path)"
+                          data-placement="bottom" title="Remove"><i class="fa fa-trash-o"></i></button>
+                 <button class="btn btn-default" data-toggle="tooltip" ng-click="vm.close()"
+                         data-placement="bottom" title="Close"><i class="fa fa-times"></i></button>
+               </div>
+               <div style="width: 50%; text-align: left; margin: 0 auto;">
+                 <h5 class="text-center" ng-bind="vm.selectedFile.name"></h5>
+                 <p> <b> Size: </b>{{vm.selectedFile.size | bytes}} </p>
+                 <p> <b> Created: </b>{{vm.selectedFile.birthtime | date: 'medium'}} </p>
+                 <p> <b> Modified: </b>{{vm.selectedFile.mtime | date: 'medium'}} </p>
+                 <div class="text-center">
+                  <button class="btn btn-sm btn-primary" ng-click="vm.useHeader(vm.selectedFile.path)"> Use as header file </button>
+                 </div> 
+               </div>
+             </div>  
+          </div>  
+          <div ng-show="vm.proccessing"> 
+            <p id="status" ng-bind="vm.status"></p>
+            <div class="progress">
+            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{vm.progress}}"
+            aria-valuemin="0" aria-valuemax="100" ng-style="{ width: vm.progress + '%'}">
+              {{vm.progress | number:1}}% Complete
+            </div>
+            <br>
+            </div>
+            <div class="text-center" style="margin-top: 5px;">
+              <button class="btn btn-sm btn-warning" ng-click="vm.proccessing = false;"> Cancel </button>
+              <button class="btn btn-sm btn-primary" ng-show="vm.completed" ng-click="vm.saveFile()"> Save </button>
+            </div>
           </div>
-        </form>
+          <div class="file-list" ng-show="vm.filesToProccess.length">
+            <ol class="rectangle-list">
+              <li ng-repeat="file in vm.filesToProccess" ng-class="{'file-selected': vm.selectedFile.path == file && vm.fileSelected}"> 
+                <a ng-click="vm.fileToggle(file)"><i class="fa fa-file-excel-o"></i>{{ vm.name(file) }}</a> 
+              </li>
+            </ol>
+          </div>
+          <div class="text-center" ng-show="vm.filesToProccess.length" style="padding: 10px;">
+              <ng-form name="sheet-config" class="form-inline" role="form" data-isolate-form novalidate>
+                  <div ng-if="!vm.sheet.isHTML">
+                    <div class="form-group">
+                      <label for="header-range">Header range:</label>
+                      <input type="text" class="form-control" name="header-range" id="header-range" ng-model="vm.sheet.headerRange" ng-pattern="/^[A-Za-z]+\d+-[A-Za-z]+\d+$/" required/>
+                    </div>
+                    <div class="form-group">
+                      <label for="data-start">Data row: </label>
+                      <input type="text" class="form-control" id="data-start" ng-model="vm.sheet.dataStart" ng-pattern="/^[A-Za-z]+\d+$/">
+                    </div>
+                  </div>
+                  <div ng-show="vm.sheet.isHTML" class="form-group">
+                      <label for="hint-word">Hint word:</label>
+                      <input type="text" class="form-control" name="hint-word" id="hint-word" ng-model="vm.sheet.hintWord" required/>
+                  </div>
+                  <div class="form-group">
+                      <label for="is-html">Parse html:</label>
+                      <input type="checkbox" class="form-control" name="is-html" id="is-html" ng-model="vm.sheet.isHTML" required/>
+                  </div>
+                  
+                  <br>
+                  <div style="margin-top: 10px;">
+                    <button class="btn btn-sm btn-success" ng-click="vm.processAll()"> Process all </button>
+                    <button class="btn btn-sm btn-danger" ng-click="vm.clearAll()"> Clear all </button>
+                  </div>
+              </ng-form>
+          </div>  
+        </ng-form>
       </div>
     </div>     
   </body>
 
   <script>    
-    require('./main-app');   
+    require('./main-app'); 
     require('./files-ctrl');
     require('./renderer');
   </script>
